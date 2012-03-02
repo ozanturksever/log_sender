@@ -1,0 +1,21 @@
+Simply tails the file and send it to remote syslog server.
+
+ * can handle if the file is rotated (via checking inode id)
+ * every file has its own tailer thread
+
+Usage:
+ $ ./start.sh
+
+Configuration example:
+
+config.ini
+--- CUT ---
+[files]
+/var/log/apache2/access.log = true
+/var/log/syslog = true
+
+[main]
+syslog_server = 1.1.1.1
+--- CUT ---
+
+This file was modified by IntelliJ IDEA 11.0.2 for binding GitHub repository
