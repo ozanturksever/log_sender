@@ -64,7 +64,7 @@ class log_sender:
     def __readConfig(self):
         config = ConfigParser.RawConfigParser()
         config.read(self.__config_file)
-        for (file,status) in config.items("files"):
+        for (name, file) in config.items("files"):
             self.__watch_files.append(file)
 
 
@@ -110,8 +110,8 @@ if __name__ == '__main__':
         config.read(CONFIG_INI)
         syslog_server = config.get('main','syslog_server')
         print "Will send logs to: %s" % syslog_server
-        for (file, status) in config.items("files"):
-            print "tailing file: %s" % file
+        for (name, file) in config.items("files"):
+            print "tailing file: %s (%s)" % (name, file)
     except Exception, err:
         print "configuration error!"
         print err

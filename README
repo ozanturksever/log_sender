@@ -11,11 +11,9 @@ Configuration example:
 config.ini
 --- CUT ---
 [files]
-/var/log/apache2/access.log = true
-/var/log/syslog = true
+access_log = /var/log/apache2/access.log
+syslog = /var/log/syslog
 
 [main]
 syslog_server = 1.1.1.1
 --- CUT ---
-
-This file was modified by IntelliJ IDEA 11.0.2 for binding GitHub repository
