@@ -8,12 +8,13 @@ Usage:
 
 Configuration example:
 
-config.ini
+config.json
 --- CUT ---
-[files]
-access_log = /var/log/apache2/access.log
-syslog = /var/log/syslog
-
-[main]
-syslog_server = 1.1.1.1
+{
+    "syslog_server" : "1.1.1.1",
+    "files": [
+        {"name":"access_log","filepath" : "/var/log/apache2/access.log"},
+        {"name":"syslog","filepath" : "/var/log/syslog.log"},
+    ]
+}
 --- CUT ---

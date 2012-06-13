@@ -2,6 +2,7 @@
 # Copyright (c) Innotim Yazilim Telekomunikasyon ve Danismanlik Ticaret LTD. STI.
 # All rights reserved.
 #
+import json
 
 __author__ = 'Ozan Turksever (ozan.turksever@logsign.net)'
 __copyright__ = 'Copyright (c) 2012 Innotim Yazilim Ltd.'
@@ -14,18 +15,17 @@ import signal
 import sys
 from transport import syslog
 from tailer.rotatable_file import rotatable_file
-import ConfigParser
 import threading
 import time
 
-CONFIG_INI = 'config.ini'
+CONFIG_FILE = 'config.json'
 SLEEP_TIME = 0.1
 QUEUE_SIZE = 10000
 BLOCK = True
 QUEUE_BLOCK_SEC = 1
 
 class log_sender:
-    def __init__(self, processor_callback=None, config_file=CONFIG_INI, shutdown_after=None):
+    def __init__(self, processor_callback=None, config_file=CONFIG_FILE, shutdown_after=None):
         self.__logQueue = Queue(QUEUE_SIZE)
         self.__processor_callback = processor_callback
         self.__config_file = config_file
@@ -62,11 +62,9 @@ class log_sender:
             self.__tailThreads.append(tailThread)
 
     def __readConfig(self):
-        config = ConfigParser.RawConfigParser()
-        config.read(self.__config_file)
-        for (file, status) in config.items("files"):
-            self.__watch_files.append(file)
-
+        config = json.loads(open(self.__config_file).read())
+        for file_config in config['files']:
+            self.__watch_files.append(file_config['filepath'])
 
 class TailThread(threading.Thread):
     def __init__(self, file, logQueue):
@@ -100,18 +98,16 @@ def processor(line):
     syslog.udp_send(message=line, host=syslog_server)
 
 if __name__ == '__main__':
-    if not os.path.exists(CONFIG_INI):
+    if not os.path.exists(CONFIG_FILE):
         print "no configuration found in path."
         print "path: %s" % os.getcwd()
-        print "config file: %s" % CONFIG_INI
+        print "config file: %s" % CONFIG_FILE
         sys.exit(1)
     try:
-        config = ConfigParser.RawConfigParser()
-        config.read(CONFIG_INI)
-        syslog_server = config.get('main','syslog_server')
-        print "Will send logs to: %s" % syslog_server
-        for (name, file) in config.items("files"):
-            print "tailing file: %s (%s)" % (name, file)
+        config = json.loads(open(CONFIG_FILE).read())
+        print "Will send logs to: %s" % config['syslog_server']
+        for file_config in config['files']:
+            print "tailing file: %s (%s)" % (file_config['name'],file_config['filepath'])
     except Exception, err:
         print "configuration error!"
         print err
