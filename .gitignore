@@ -1,0 +1,6 @@
+*.pyc
+fabfile.py
+fabfile.pyc
+.DS_Store
+
+nohup.out
