@@ -2,7 +2,7 @@
 # Copyright (c) Innotim Yazilim Telekomunikasyon ve Danismanlik Ticaret LTD. STI.
 # All rights reserved.
 #
-import socket
+from gevent import socket
 
 FACILITY = {
     'kern': 0, 'user': 1, 'mail': 2, 'daemon': 3,
@@ -17,8 +17,7 @@ LEVEL = {
     'warning': 4, 'notice': 5, 'info': 6, 'debug': 7
 }
 
-def udp_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
-           host='localhost', port=514):
+def udp_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'], host='localhost', port=514):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     data = '<%d>%s' % (level + facility*8, message)
     sock.sendto(data, (host, port))

@@ -33,7 +33,7 @@ class log_sender:
         self.__startTailingThreads()
         self.__shutdown = False
 
-        self._addGreenlet(gevent.spawn(self.__processLogs))
+        self._addGreenlet(gevent.spawn(self.__processLogs, callback=self.__processor_callback))
         if shutdown_after:
             self.__greenlets.append(gevent.spawn(self.shutdown, shutdown_after))
 
@@ -43,15 +43,15 @@ class log_sender:
     def _addGreenlet(self, greenlet):
         self.__greenlets.append(greenlet)
 
-    def __processLogs(self):
+    def __processLogs(self, callback):
         while not self.__shutdown:
             try:
                 line = self.__logQueue.get(True, 1)
-                if self.__processor_callback:
-                    self.__processor_callback(line)
-                gevent.sleep(0)
+                if callback:
+                    callback(line)
             except Exception, err:
                 pass
+            gevent.sleep(0)
 
     def shutdown(self, when):
         print "Will shutdown after %d secs" % when
@@ -107,7 +107,7 @@ signal.signal(signal.SIGINT, shutdown)
 signal.signal(signal.SIGTERM, shutdown)
 
 def processor(line):
-    syslog.udp_send(message=line, host=syslog_server)
+    syslog.udp_send(message=line, host=config['syslog_server'])
 
 if __name__ == '__main__':
     if not os.path.exists(CONFIG_FILE):
@@ -126,5 +126,5 @@ if __name__ == '__main__':
         sys.exit(1)
         pass
 
-    log_sender = log_sender(processor_callback=processor,shutdown_after=3)
+    log_sender = log_sender(processor_callback=processor)
     log_sender.join()
