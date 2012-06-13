@@ -64,7 +64,7 @@ class log_sender:
     def __readConfig(self):
         config = ConfigParser.RawConfigParser()
         config.read(self.__config_file)
-        for (name, file) in config.items("files"):
+        for (file, status) in config.items("files"):
             self.__watch_files.append(file)
 
 

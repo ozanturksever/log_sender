@@ -30,8 +30,8 @@ class test_log_sender(unittest.TestCase):
     def test_can_read_config(self):
         self.log_sender = log_sender(config_file=CONFIG_FILE, shutdown_after=0.1)
         list = self.log_sender.getTailList()
-        self.assertEqual(list[0], TEST_LOG_FILE0)
-        self.assertEqual(list[1], TEST_LOG_FILE1)
+        self.assertTrue(TEST_LOG_FILE0 in list)
+        self.assertTrue(TEST_LOG_FILE1 in list)
 
     def test_can_tail_file(self):
         lines = []
