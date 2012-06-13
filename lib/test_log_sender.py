@@ -5,7 +5,6 @@ from log_sender import log_sender
 
 TEST_LOG_FILE0 = "/tmp/test0.log"
 TEST_LOG_FILE1 = "/tmp/test1.log"
-#TEST_CONFIG_CONTENT = "[files]\n%s = true\n%s = true\n" % (TEST_LOG_FILE0, TEST_LOG_FILE1)
 TEST_CONFIG_CONTENT = '{"files":[{"filepath":"%s"}, {"filepath":"%s"}]}\n' % (TEST_LOG_FILE0, TEST_LOG_FILE1)
 CONFIG_FILE = "/tmp/config.json"
 END_LINE = "\n"

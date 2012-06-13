@@ -14,7 +14,7 @@ import os
 import signal
 import sys
 from transport import syslog
-from tailer.rotatable_file import rotatable_file
+from tailer.rotatable_file import RotatableFile
 import threading
 import time
 
@@ -74,7 +74,7 @@ class TailThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        self.__rotatable_file = rotatable_file(self.__file)
+        self.__rotatable_file = RotatableFile(self.__file)
         while 1:
             if self.__shutdown:
                 break

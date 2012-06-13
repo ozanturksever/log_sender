@@ -10,7 +10,7 @@ TEST_LOG_FILE = "/tmp/test.log"
 
 import unittest
 import os
-from rotatable_file import rotatable_file
+from rotatable_file import RotatableFile
 
 class test_rotatable_file(unittest.TestCase):
     def setUp(self):
@@ -18,7 +18,7 @@ class test_rotatable_file(unittest.TestCase):
         self.__construct_rotatable_file()
 
     def __construct_rotatable_file(self):
-        self.rotatable_file = rotatable_file(TEST_LOG_FILE)
+        self.rotatable_file = RotatableFile(TEST_LOG_FILE)
         self.rotatable_file.open()
 
     def __insert_one_line(self, line):

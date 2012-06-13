@@ -13,7 +13,7 @@ import os
 DEFAULT_SEEK_OFFSET = 0
 SEEK_FROM_END = 2
 
-class rotatable_file:
+class RotatableFile:
     def __init__(self, filename):
         self.filename = filename
         self.file = None
