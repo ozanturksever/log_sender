@@ -1,6 +1,6 @@
-[files]
-access_log = /var/log/apache2/access.log
-syslog = /var/log/syslog
-
-[main]
-syslog_server = 1.1.1.1
+{
+    "syslog_server": "192.168.1.100",
+    "files": [
+        {"name":"test", "filepath":"/tmp/test.log"}
+    ]
+}

@@ -1,6 +1,6 @@
 import os
 import unittest
-import time
+import gevent
 from log_sender import log_sender
 
 TEST_LOG_FILE0 = "/tmp/test0.log"
@@ -22,13 +22,15 @@ class test_log_sender(unittest.TestCase):
             lines.append(line)
 
         self.log_sender = log_sender(processor_callback=process, config_file=CONFIG_FILE, shutdown_after=1)
+        self.log_sender._addGreenlet(gevent.spawn(self.__insert_lines))
+        self.log_sender.join()
+        self.assertTrue("test line" in lines)
+        self.assertTrue("test line2" in lines)
 
+    def __insert_lines(self):
         self.__insert_one_line(TEST_LOG_FILE0,"test line\n")
-        time.sleep(0.1)
+        gevent.sleep(0.1)
         self.__insert_one_line(TEST_LOG_FILE1,"test line2\n")
-        self.log_sender.processLogs()
-        self.assertEqual(lines[0], "test line")
-        self.assertEqual(lines[1], "test line2")
 
     def setUp(self):
         self.__setup_test_config()
@@ -36,9 +38,9 @@ class test_log_sender(unittest.TestCase):
         for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
             self.__open_test_file(file)
 
-    def tearDown(self):
-        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
-            os.remove(file)
+#    def tearDown(self):
+#        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
+#            os.remove(file)
 #        os.remove(CONFIG_FILE)
 
     def __setup_test_config(self):

@@ -13,28 +13,8 @@ import os
 from rotatable_file import RotatableFile
 
 class test_rotatable_file(unittest.TestCase):
-    def setUp(self):
-        self.__open_test_file()
-        self.__construct_rotatable_file()
-
-    def __construct_rotatable_file(self):
-        self.rotatable_file = RotatableFile(TEST_LOG_FILE)
-        self.rotatable_file.open()
-
-    def __insert_one_line(self, line):
-        self.test_file.write(line + END_LINE)
-        self.test_file.flush()
-
-    def __rotate_test_file(self):
-        self.test_file.close()
-        os.remove(TEST_LOG_FILE)
-        self.__open_test_file()
-
-    def __open_test_file(self):
-        self.test_file = open(TEST_LOG_FILE,"w")
-
     def test_can_pass_filename(self):
-        self.assertEqual(TEST_LOG_FILE, self.rotatable_file.getFileName())
+        self.assertEqual(TEST_LOG_FILE, self.rotatable_file.getFilePath())
 
     def test_can_tail_one_line(self):
         self.__insert_one_line(LINE_ONE)
@@ -67,6 +47,36 @@ class test_rotatable_file(unittest.TestCase):
         self.__insert_one_line(LINE_TWO)
         line = self.rotatable_file.getLine()
         self.assertEqual(LINE_TWO, line)
+
+    def test_read_from_0_position(self):
+        self.__insert_one_line(LINE_ONE)
+        self.__insert_one_line(LINE_TWO)
+        self.__construct_rotatable_file(position=0)
+        line_one = self.rotatable_file.getLine()
+        second_line = self.rotatable_file.getLine()
+        self.assertEqual(line_one, LINE_ONE)
+        self.assertEqual(second_line, LINE_TWO)
+
+    def setUp(self):
+        self.__open_test_file()
+        self.__construct_rotatable_file()
+
+    def __construct_rotatable_file(self, position = -1 ):
+        self.rotatable_file = RotatableFile(filepath = TEST_LOG_FILE, position=position)
+        self.rotatable_file.open()
+
+    def __insert_one_line(self, line):
+        self.test_file.write(line + END_LINE)
+        self.test_file.flush()
+
+    def __rotate_test_file(self):
+        self.test_file.close()
+        os.remove(TEST_LOG_FILE)
+        self.__open_test_file()
+
+    def __open_test_file(self):
+        self.test_file = open(TEST_LOG_FILE,"w")
+
 
 if __name__ == '__main__':
     unittest.main()

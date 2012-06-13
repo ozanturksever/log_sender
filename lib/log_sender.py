@@ -9,20 +9,17 @@ __copyright__ = 'Copyright (c) 2012 Innotim Yazilim Ltd.'
 __license__ = 'GPLv2'
 __version__ = '0.0.1'
 
-from Queue import Queue
+from gevent.queue import Queue
 import os
 import signal
 import sys
 from transport import syslog
-from tailer.rotatable_file import RotatableFile
-import threading
-import time
+from tailers.rotatable_file import RotatableFile
+import gevent
 
 CONFIG_FILE = 'config.json'
 SLEEP_TIME = 0.1
 QUEUE_SIZE = 10000
-BLOCK = True
-QUEUE_BLOCK_SEC = 1
 
 class log_sender:
     def __init__(self, processor_callback=None, config_file=CONFIG_FILE, shutdown_after=None):
@@ -30,48 +27,64 @@ class log_sender:
         self.__processor_callback = processor_callback
         self.__config_file = config_file
         self.__watch_files = []
-        self.__tailThreads = []
+        self.__tailGreenlets = []
+        self.__greenlets = []
         self.__readConfig()
         self.__startTailingThreads()
         self.__shutdown = False
-        if shutdown_after:
-            t = threading.Timer(shutdown_after, self.shutdown)
-            t.start()
 
-    def processLogs(self):
+        self._addGreenlet(gevent.spawn(self.__processLogs))
+        if shutdown_after:
+            self.__greenlets.append(gevent.spawn(self.shutdown, shutdown_after))
+
+    def join(self):
+        gevent.joinall(self.__greenlets)
+
+    def _addGreenlet(self, greenlet):
+        self.__greenlets.append(greenlet)
+
+    def __processLogs(self):
         while not self.__shutdown:
             try:
-                line = self.__logQueue.get(BLOCK, QUEUE_BLOCK_SEC)
+                line = self.__logQueue.get(True, 1)
                 if self.__processor_callback:
                     self.__processor_callback(line)
+                gevent.sleep(0)
             except Exception, err:
                 pass
 
-    def shutdown(self):
-        for thread in self.__tailThreads:
-            thread.shutdown()
+    def shutdown(self, when):
+        print "Will shutdown after %d secs" % when
+        gevent.sleep(when)
         self.__shutdown = True
+        for thread in self.__tailGreenlets:
+            thread.shutdown()
+
+        for thread in self.__greenlets:
+            thread.kill()
+        print "shutdown complete"
 
     def getTailList(self):
         return self.__watch_files
 
     def __startTailingThreads(self):
         for file in self.__watch_files:
-            tailThread = TailThread(file, self.__logQueue)
-            tailThread.start()
-            self.__tailThreads.append(tailThread)
+            tailGreenlet = TailGreenlet(file, self.__logQueue)
+            tailGreenlet.start()
+            self._addGreenlet(tailGreenlet)
+            self.__tailGreenlets.append(tailGreenlet)
 
     def __readConfig(self):
         config = json.loads(open(self.__config_file).read())
         for file_config in config['files']:
             self.__watch_files.append(file_config['filepath'])
 
-class TailThread(threading.Thread):
+class TailGreenlet(gevent.Greenlet):
     def __init__(self, file, logQueue):
         self.__file = file
         self.__shutdown = False
         self.__logQueue = logQueue
-        threading.Thread.__init__(self)
+        gevent.Greenlet.__init__(self)
 
     def run(self):
         self.__rotatable_file = RotatableFile(self.__file)
@@ -79,8 +92,8 @@ class TailThread(threading.Thread):
             if self.__shutdown:
                 break
             line = self.__rotatable_file.getLine()
-            if line == '':
-                time.sleep(SLEEP_TIME)
+            if line == '' or line == '\0':
+                gevent.sleep(SLEEP_TIME)
                 continue
             self.__logQueue.put(line)
 
@@ -88,7 +101,6 @@ class TailThread(threading.Thread):
         self.__shutdown = True
 
 def shutdown(signal, frame):
-    print "shutting down"
     log_sender.shutdown()
 
 signal.signal(signal.SIGINT, shutdown)
@@ -114,5 +126,5 @@ if __name__ == '__main__':
         sys.exit(1)
         pass
 
-    log_sender = log_sender(processor_callback=processor)
-    log_sender.processLogs()
+    log_sender = log_sender(processor_callback=processor,shutdown_after=3)
+    log_sender.join()
