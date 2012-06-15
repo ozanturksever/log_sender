@@ -1,8 +1,10 @@
+import os
 import unittest
 import time
 from text_file import TextFile
 
 TEST_FILE_PATH = '/tmp/file.txt'
+TEST_FILE_PATH_PROCESSED = '/tmp/processed_file.txt'
 
 class test_text_file(unittest.TestCase):
     def test_can_read_file(self):
@@ -12,6 +14,11 @@ class test_text_file(unittest.TestCase):
     def test_close_fd_after_eof(self):
         self.__get_file_content()
         self.assertFalse(self.text_file.isOpen())
+
+    def test_rotate_after_eof(self):
+        self.__get_file_content()
+        self.assertFalse(os.path.exists(TEST_FILE_PATH))
+        self.assertTrue(os.path.exists(TEST_FILE_PATH_PROCESSED))
 
     def setUp(self):
         self.text_file = TextFile(filepath=TEST_FILE_PATH)

@@ -38,10 +38,10 @@ class test_log_sender(unittest.TestCase):
         for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
             self.__open_test_file(file)
 
-#    def tearDown(self):
-#        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
-#            os.remove(file)
-#        os.remove(CONFIG_FILE)
+    def tearDown(self):
+        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
+            os.remove(file)
+        os.remove(CONFIG_FILE)
 
     def __setup_test_config(self):
         config_ini = open(CONFIG_FILE,"w")
