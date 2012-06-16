@@ -7,7 +7,7 @@ from src.helpers.config.config import Config
 from src.manager.processor_manager import ProcessorManager
 from src.manager.watch_file_manager import WatchFileManager
 from src.tests import test_helper
-from src.tests.test_helper import TEST_LOG_FILE0, TEST_LOG_FILE1, CONFIG_FILE, TEST_CONFIG_CONTENT, END_LINE, TEST_DIR, TEST_DIR_FILE0
+from src.tests.test_helper import TEST_LOG_FILE0, TEST_LOG_FILE1, CONFIG_FILE, TEST_CONFIG_CONTENT, END_LINE, TEST_DIR, TEST_DIR_FILE0, TEST_LOG_FILE2
 
 class test_watch_file_manager(unittest.TestCase):
     def test_can_read_config(self):
@@ -51,6 +51,21 @@ class test_watch_file_manager(unittest.TestCase):
         files = self.manager.get_active_files()
         self.assertTrue(TEST_DIR+'/test.log' not in files)
 
+    def test_can_tail_from_top(self):
+        self.__insert_one_line(TEST_LOG_FILE2, "first line\n")
+        self.__insert_one_line(TEST_LOG_FILE2, "second line\n")
+        self.manager = WatchFileManager(ProcessorManager(),shutdown_after=1)
+        gevent.sleep(0.9)
+        count = self.manager.get_processed_msg_count()
+        self.assertEqual(count, 2)
+
+    def test_move_on_eof(self):
+        self.__insert_one_line(TEST_LOG_FILE2, "first line\n")
+        self.manager = WatchFileManager(ProcessorManager(),shutdown_after=1)
+        gevent.sleep(0.9)
+        dst = "/tmp/processed_%s.done" % os.path.basename(TEST_LOG_FILE2)
+        self.assertTrue(os.path.exists(dst))
+
     def __insert_lines(self):
         self.__insert_one_line(TEST_LOG_FILE0, "test line\n")
         gevent.sleep(0.1)
@@ -63,7 +78,7 @@ class test_watch_file_manager(unittest.TestCase):
         test_helper.setUp()
         self.__config_server = Config(config_file=CONFIG_FILE)
         self.test_files = {}
-        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
+        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1, TEST_LOG_FILE2]:
             self.__open_test_file(file)
 
         for file in [TEST_DIR+'/'+TEST_DIR_FILE0]:

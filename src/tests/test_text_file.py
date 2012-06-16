@@ -19,7 +19,7 @@ class test_text_file(unittest.TestCase):
         self.assertTrue(os.path.exists(TEST_FILE_PATH_PROCESSED))
 
     def setUp(self):
-        self.text_file = TextFileReader(filepath=TEST_FILE_PATH)
+        self.text_file = TextFileReader(filepath=TEST_FILE_PATH, moveinfo={'dstdir':'/tmp/','prefix':'processed_'})
         f = open(TEST_FILE_PATH,"w")
         f.write("line 1\nline 2\n\nline 3\n")
         f.close()
