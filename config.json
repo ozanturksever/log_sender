@@ -1,6 +1,11 @@
 {
-    "syslog_server": "192.168.1.100",
     "files": [
-        {"name":"test", "filepath":"/tmp/test.log"}
-    ]
+        {"name":"testfile0", "filepath": "/tmp/test0.log", "processor":"syslog0"},
+        {"name":"testfile1", "filepath": "/tmp/test1.log", "processor":"syslog1"},
+        {"name":"dir", "filepath": "/tmp/*.txt", "processor":"syslog1"}
+    ],
+    "processor": {
+        "syslog0": { "type":"syslog", "host":"1.1.1.1", "port": 514},
+        "syslog1": { "type":"syslog", "host":"2.2.2.2", "port": 514}
+    }
 }

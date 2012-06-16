@@ -22,13 +22,16 @@ class Config:
     def getWatchFiles(self):
         return self.__config['files']
 
+    def getProcessor(self, name):
+        return self.__config['processor'][name]
+
     def get(self, key):
         return self.__config.get(key)
 
     def __start_server(self):
         self.__context = zmq.Context()
         self.__socket = self.__context.socket(zmq.REP)
-        self.__socket.bind('tcp://*:10001')
+        self.__socket.bind('tcp://127.0.0.1:10001')
         spawn(self.__serve, self.__socket)
 
 

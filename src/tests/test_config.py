@@ -1,10 +1,10 @@
 import unittest
 import msgpack
-from lib.helpers.config.config import Config
+from src.helpers.config.config import Config
 from gevent_zeromq import zmq
 from gevent import spawn
 from gevent import sleep
-from lib.tests.test_helper import TEST_CONFIG_CONTENT, CONFIG_FILE, TEST_LOG_FILE0, TEST_LOG_FILE1
+from src.tests.test_helper import TEST_CONFIG_CONTENT, CONFIG_FILE, TEST_LOG_FILE0, TEST_LOG_FILE1
 
 __author__ = 'ozanturksever'
 
@@ -42,3 +42,7 @@ class test_config(unittest.TestCase):
         files = msgpack.unpackb(socket.recv())
         self.assertEqual(files[0]['filepath'], TEST_LOG_FILE0)
         self.assertEqual(files[1]['filepath'], TEST_LOG_FILE1)
+
+    def test_get_processor_config(self):
+        conf = self.config.getProcessor('syslog0')
+        self.assertEqual(conf['host'],'1.1.1.1')

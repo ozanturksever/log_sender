@@ -11,13 +11,16 @@ class ConfigClient(object):
         self.__socket.connect('tcp://localhost:10001')
 
     def get(self, key):
-        msg = msgpack.packb({'func':'get', 'args': (key)})
-        self.__socket.send(msg)
-        resp = self.__socket.recv()
-        return msgpack.unpackb(resp)
+        return self.__send_recv({'func':'get', 'args': (key)})
 
     def getWatchFiles(self):
-        msg = msgpack.packb({'func':'getWatchFiles'})
+        return self.__send_recv({'func':'getWatchFiles'})
+
+    def getProcessor(self, name):
+        return self.__send_recv({'func':'getProcessor', 'args':(name)})
+
+    def __send_recv(self, rawmsg):
+        msg = msgpack.packb(rawmsg)
         self.__socket.send(msg)
         resp = self.__socket.recv()
         return msgpack.unpackb(resp)

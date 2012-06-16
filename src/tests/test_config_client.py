@@ -1,8 +1,8 @@
 import unittest
-from lib.helpers.config.config_client import ConfigClient
-from lib.helpers.config.config import Config
-from lib.tests import test_helper
-from lib.tests.test_helper import CONFIG_FILE, TEST_CONFIG_CONTENT, TEST_LOG_FILE0, TEST_LOG_FILE1
+from src.helpers.config.config_client import ConfigClient
+from src.helpers.config.config import Config
+from src.tests import test_helper
+from src.tests.test_helper import CONFIG_FILE, TEST_CONFIG_CONTENT, TEST_LOG_FILE0, TEST_LOG_FILE1
 
 class test_config_client(unittest.TestCase):
     def setUp(self):
@@ -27,3 +27,7 @@ class test_config_client(unittest.TestCase):
         self.assertTrue(type(files) in [list, tuple])
         self.assertEqual(files[0]['filepath'], TEST_LOG_FILE0)
         self.assertEqual(files[1]['filepath'], TEST_LOG_FILE1)
+
+    def test_get_processor_config(self):
+        conf = self.config_client.getProcessor('syslog0')
+        self.assertEqual(conf['host'],'1.1.1.1')

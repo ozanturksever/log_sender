@@ -11,10 +11,13 @@ Configuration example:
 config.json
 --- CUT ---
 {
-    "syslog_server" : "1.1.1.1",
     "files": [
-        {"name":"access_log","filepath" : "/var/log/apache2/access.log"},
-        {"name":"syslog","filepath" : "/var/log/syslog.log"},
-    ]
+        {"name":"testfile0", "filepath": "/tmp/test0.log", "processor":"syslog0"},
+        {"name":"testfile1", "filepath": "/tmp/test1.log", "processor":"syslog1"}
+    ],
+    "processor": {
+        "syslog0": { "type":"syslog", "host":"1.1.1.1", "port": 514},
+        "syslog1": { "type":"syslog", "host":"2.2.2.2", "port": 514}
+    }
 }
 --- CUT ---

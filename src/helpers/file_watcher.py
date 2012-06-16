@@ -1,5 +1,5 @@
 import gevent
-from lib.reader.rotatable_file_reader import RotatableFileReader
+from src.reader.rotatable_file_reader import RotatableFileReader
 
 SLEEP_TIME = 0.1
 
@@ -10,8 +10,12 @@ class FileWatcher(gevent.Greenlet):
         self.__logQueue = logQueue
         gevent.Greenlet.__init__(self)
 
+
+    def get_file(self):
+        return self.__file
+
     def run(self):
-        self.__rotatable_file = RotatableFileReader(self.__file)
+        self.__rotatable_file = RotatableFileReader(self.__file['filepath'])
         while 1:
             if self.__shutdown:
                 break
@@ -19,7 +23,8 @@ class FileWatcher(gevent.Greenlet):
             if line == '' or line == '\0':
                 gevent.sleep(SLEEP_TIME)
                 continue
-            self.__logQueue.put(line)
+            #TODO: handle queue full
+            self.__logQueue.put((self.__file['processor'],line))
 
     def shutdown(self):
         self.__shutdown = True

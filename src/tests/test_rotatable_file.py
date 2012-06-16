@@ -5,9 +5,9 @@
 
 import unittest
 import os
-from lib.reader.rotatable_file_reader import RotatableFileReader
-from lib.tests import test_helper
-from lib.tests.test_helper import TEST_LOG_FILE, LINE_ONE, LINE_TWO, END_LINE
+from src.reader.rotatable_file_reader import RotatableFileReader
+from src.tests import test_helper
+from src.tests.test_helper import TEST_LOG_FILE, LINE_ONE, LINE_TWO, END_LINE
 
 class test_rotatable_file(unittest.TestCase):
     def test_can_pass_filename(self):

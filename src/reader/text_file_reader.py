@@ -1,6 +1,6 @@
 import os
 import shutil
-from lib.reader.rotatable_file import RotatableFileReader
+from src.reader.rotatable_file_reader import RotatableFileReader
 
 __author__ = 'ozanturksever'
 

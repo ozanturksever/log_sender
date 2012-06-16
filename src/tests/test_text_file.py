@@ -1,8 +1,8 @@
 import os
 import unittest
-from lib.reader.text_file_reader import TextFileReader
-from lib.tests import test_helper
-from lib.tests.test_helper import TEST_FILE_PATH, TEST_FILE_PATH_PROCESSED
+from src.reader.text_file_reader import TextFileReader
+from src.tests import test_helper
+from src.tests.test_helper import TEST_FILE_PATH, TEST_FILE_PATH_PROCESSED
 
 class test_text_file(unittest.TestCase):
     def test_can_read_file(self):
