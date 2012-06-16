@@ -1,17 +1,16 @@
 import os
 import shutil
-from tailers.rotatable_file import RotatableFile
-import time
+from lib.reader.rotatable_file import RotatableFileReader
 
 __author__ = 'ozanturksever'
 
-class TextFile(RotatableFile):
+class TextFileReader(RotatableFileReader):
     def __init__(self, filepath):
-        super(TextFile, self).__init__(filepath=filepath, position=0, close_on_EOF=True)
+        super(TextFileReader, self).__init__(filepath=filepath, position=0, close_on_EOF=True)
         self.__filepath = filepath
 
     def close(self):
-        super(TextFile, self).close()
+        super(TextFileReader, self).close()
         if os.path.exists(self.getFilePath()):
             shutil.move(self.getFilePath(),
                 os.path.dirname(self.getFilePath()) + '/processed_' + os.path.basename(self.getFilePath()))

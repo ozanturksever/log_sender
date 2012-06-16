@@ -21,4 +21,4 @@ def udp_send(message, level=LEVEL['notice'], facility=FACILITY['daemon'], host='
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     data = '<%d>%s' % (level + facility*8, message)
     sock.sendto(data, (host, port))
-    sock.close()
+    sock.shutdown()

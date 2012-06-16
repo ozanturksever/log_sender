@@ -1,18 +1,15 @@
 import os
 import unittest
 import gevent
-from log_sender import log_sender
-
-TEST_LOG_FILE0 = "/tmp/test0.log"
-TEST_LOG_FILE1 = "/tmp/test1.log"
-TEST_CONFIG_CONTENT = '{"files":[{"filepath":"%s"}, {"filepath":"%s"}]}\n' % (TEST_LOG_FILE0, TEST_LOG_FILE1)
-CONFIG_FILE = "/tmp/config.json"
-END_LINE = "\n"
+from lib.log_sender import log_sender
+from lib.helpers.config.config import Config
+from lib.tests import test_helper
+from lib.tests.test_helper import TEST_LOG_FILE0, TEST_LOG_FILE1, CONFIG_FILE, TEST_CONFIG_CONTENT, END_LINE
 
 class test_log_sender(unittest.TestCase):
     def test_can_read_config(self):
-        self.log_sender = log_sender(config_file=CONFIG_FILE, shutdown_after=0.1)
-        list = self.log_sender.getTailList()
+        self.log_sender = log_sender(shutdown_after=0.1)
+        list = self.log_sender.getWatchList()
         self.assertTrue(TEST_LOG_FILE0 in list)
         self.assertTrue(TEST_LOG_FILE1 in list)
 
@@ -21,9 +18,9 @@ class test_log_sender(unittest.TestCase):
         def process(line):
             lines.append(line)
 
-        self.log_sender = log_sender(processor_callback=process, config_file=CONFIG_FILE, shutdown_after=1)
+        self.log_sender = log_sender(processor_callback=process, shutdown_after=1)
         self.log_sender._addGreenlet(gevent.spawn(self.__insert_lines))
-        self.log_sender.join()
+        gevent.sleep(0.5)
         self.assertTrue("test line" in lines)
         self.assertTrue("test line2" in lines)
 
@@ -33,20 +30,15 @@ class test_log_sender(unittest.TestCase):
         self.__insert_one_line(TEST_LOG_FILE1,"test line2\n")
 
     def setUp(self):
-        self.__setup_test_config()
+        test_helper.setUp()
+        self.__config_server = Config(config_file=CONFIG_FILE)
         self.test_files = {}
         for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
             self.__open_test_file(file)
 
     def tearDown(self):
-        for file in [TEST_LOG_FILE0, TEST_LOG_FILE1]:
-            os.remove(file)
-        os.remove(CONFIG_FILE)
-
-    def __setup_test_config(self):
-        config_ini = open(CONFIG_FILE,"w")
-        config_ini.write(TEST_CONFIG_CONTENT)
-        config_ini.close()
+        test_helper.tearDown()
+        self.__config_server.shutdown()
 
     def __open_test_file(self, file):
         self.test_files[file] = open(file,"w")

@@ -2,8 +2,8 @@
 # Copyright (c) Innotim Yazilim Telekomunikasyon ve Danismanlik Ticaret LTD. STI.
 # All rights reserved.
 #
-import json
-from tail_file import TailFile
+from lib.helpers.file_watcher import FileWatcher
+from lib.helpers.config.config_client import ConfigClient
 
 __author__ = 'Ozan Turksever (ozan.turksever@logsign.net)'
 __copyright__ = 'Copyright (c) 2012 Innotim Yazilim Ltd.'
@@ -14,18 +14,16 @@ from gevent.queue import Queue
 import gevent
 
 QUEUE_SIZE = 10000
-CONFIG_FILE = 'config.json'
 
-class log_sender:
-    def __init__(self, processor_callback=None, config_file=CONFIG_FILE, shutdown_after=None):
+class WatchFileManager:
+    def __init__(self, processor_callback=None, shutdown_after=None):
         self.__logQueue = Queue(QUEUE_SIZE)
         self.__processor_callback = processor_callback
-        self.__config_file = config_file
-        self.__watch_files = []
-        self.__tailGreenlets = []
+        config = ConfigClient()
+        self.__watch_files = [f['filepath'] for f in config.getWatchFiles()]
+        self.__watchGreenlets = []
         self.__greenlets = []
-        self.__readConfig()
-        self.__startTailingThreads()
+        self.__startWatching()
         self.__shutdown = False
 
         self._addGreenlet(gevent.spawn(self.__processLogs, callback=self.__processor_callback))
@@ -42,9 +40,6 @@ class log_sender:
                 pass
             gevent.sleep(0)
 
-    def join(self):
-        gevent.joinall(self.__greenlets)
-
     def _addGreenlet(self, greenlet):
         self.__greenlets.append(greenlet)
 
@@ -52,25 +47,19 @@ class log_sender:
         print "Will shutdown after %d secs" % when
         gevent.sleep(when)
         self.__shutdown = True
-        for thread in self.__tailGreenlets:
+        for thread in self.__watchGreenlets:
             thread.shutdown()
 
         for thread in self.__greenlets:
             thread.kill()
         print "shutdown complete"
 
-    def getTailList(self):
+    def getWatchList(self):
         return self.__watch_files
 
-    def __startTailingThreads(self):
+    def __startWatching(self):
         for file in self.__watch_files:
-            tailGreenlet = TailFile(file, self.__logQueue)
-            tailGreenlet.start()
-            self._addGreenlet(tailGreenlet)
-            self.__tailGreenlets.append(tailGreenlet)
-
-    def __readConfig(self):
-        config = json.loads(open(self.__config_file).read())
-        for file_config in config['files']:
-            self.__watch_files.append(file_config['filepath'])
-
+            watcher = FileWatcher(file, self.__logQueue)
+            watcher.start()
+            self._addGreenlet(watcher)
+            self.__watchGreenlets.append(watcher)

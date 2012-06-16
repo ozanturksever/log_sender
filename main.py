@@ -1,9 +1,10 @@
-import json
 import os
 import signal
 import sys
+import gevent
+from lib.helpers.config.config import Config
 from lib.transport import syslog
-from lib.log_sender import log_sender
+from lib.managers.watch_file_manager import WatchFileManager
 
 CONFIG_FILE = 'config.json'
 
@@ -14,6 +15,7 @@ signal.signal(signal.SIGINT, shutdown)
 signal.signal(signal.SIGTERM, shutdown)
 
 def processor(line):
+    print line
     syslog.udp_send(message=line, host=config['syslog_server'])
 
 if __name__ == '__main__':
@@ -22,10 +24,11 @@ if __name__ == '__main__':
         print "path: %s" % os.getcwd()
         print "config file: %s" % CONFIG_FILE
         sys.exit(1)
+
+    config = Config()
     try:
-        config = json.loads(open(CONFIG_FILE).read())
-        print "Will send logs to: %s" % config['syslog_server']
-        for file_config in config['files']:
+        print "Will send logs to: %s" % config.get('syslog_server')
+        for file_config in config.getWatchFiles():
             print "tailing file: %s (%s)" % (file_config['name'],file_config['filepath'])
     except Exception, err:
         print "configuration error!"
@@ -34,5 +37,6 @@ if __name__ == '__main__':
         sys.exit(1)
         pass
 
-    log_sender = log_sender(processor_callback=processor)
-    log_sender.join()
+    log_sender = WatchFileManager(processor_callback=processor)
+    while True:
+        gevent.sleep(0)

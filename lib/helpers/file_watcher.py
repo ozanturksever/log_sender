@@ -1,9 +1,9 @@
 import gevent
-from tailers.rotatable_file import RotatableFile
+from lib.reader.rotatable_file_reader import RotatableFileReader
 
 SLEEP_TIME = 0.1
 
-class TailFile(gevent.Greenlet):
+class FileWatcher(gevent.Greenlet):
     def __init__(self, file, logQueue):
         self.__file = file
         self.__shutdown = False
@@ -11,7 +11,7 @@ class TailFile(gevent.Greenlet):
         gevent.Greenlet.__init__(self)
 
     def run(self):
-        self.__rotatable_file = RotatableFile(self.__file)
+        self.__rotatable_file = RotatableFileReader(self.__file)
         while 1:
             if self.__shutdown:
                 break

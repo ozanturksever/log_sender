@@ -1,10 +1,8 @@
 import os
 import unittest
-import time
-from text_file import TextFile
-
-TEST_FILE_PATH = '/tmp/file.txt'
-TEST_FILE_PATH_PROCESSED = '/tmp/processed_file.txt'
+from lib.reader.text_file_reader import TextFileReader
+from lib.tests import test_helper
+from lib.tests.test_helper import TEST_FILE_PATH, TEST_FILE_PATH_PROCESSED
 
 class test_text_file(unittest.TestCase):
     def test_can_read_file(self):
@@ -21,10 +19,13 @@ class test_text_file(unittest.TestCase):
         self.assertTrue(os.path.exists(TEST_FILE_PATH_PROCESSED))
 
     def setUp(self):
-        self.text_file = TextFile(filepath=TEST_FILE_PATH)
+        self.text_file = TextFileReader(filepath=TEST_FILE_PATH)
         f = open(TEST_FILE_PATH,"w")
         f.write("line 1\nline 2\n\nline 3\n")
         f.close()
+
+    def tearDown(self):
+        test_helper.tearDown()
 
     def __get_file_content(self):
         content = ''

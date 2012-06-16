@@ -14,7 +14,7 @@ import os
 DEFAULT_SEEK_OFFSET = 0
 SEEK_FROM_END = 2
 
-class RotatableFile(object):
+class RotatableFileReader(object):
     def __init__(self, filepath, position=START_FROM_END, close_on_EOF = False):
         self.__filepath = filepath
         self.__file = None

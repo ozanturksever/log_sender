@@ -3,14 +3,11 @@
 # All rights reserved.
 #
 
-LINE_ONE = "first line"
-LINE_TWO = "second line"
-END_LINE = "\n"
-TEST_LOG_FILE = "/tmp/test.log"
-
 import unittest
 import os
-from rotatable_file import RotatableFile
+from lib.reader.rotatable_file_reader import RotatableFileReader
+from lib.tests import test_helper
+from lib.tests.test_helper import TEST_LOG_FILE, LINE_ONE, LINE_TWO, END_LINE
 
 class test_rotatable_file(unittest.TestCase):
     def test_can_pass_filename(self):
@@ -61,8 +58,11 @@ class test_rotatable_file(unittest.TestCase):
         self.__open_test_file()
         self.__construct_rotatable_file()
 
+    def tearDown(self):
+        test_helper.tearDown()
+
     def __construct_rotatable_file(self, position = -1 ):
-        self.rotatable_file = RotatableFile(filepath = TEST_LOG_FILE, position=position)
+        self.rotatable_file = RotatableFileReader(filepath = TEST_LOG_FILE, position=position)
         self.rotatable_file.open()
 
     def __insert_one_line(self, line):
